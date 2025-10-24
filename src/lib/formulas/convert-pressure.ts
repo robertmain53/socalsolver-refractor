@@ -1,9 +1,23 @@
-import type { CalculatorSpec } from '@/specs/calculator';
+import type { CalculatorMeta, Formula } from '@/specs/calculator';
 
-/**
- * Converts pressure between Pa, bar, psi, atm.
- */
-export const spec: CalculatorSpec = {
+/** Client formula (pure) */
+export const formula: Formula = (inputs) => {
+  const v = Number(inputs.value ?? 0);
+  const from = String(inputs.from ?? 'Pa');
+  const toPaFactor: Record<string, number> = {
+    Pa: 1, bar: 1e5, psi: 6894.757293168, atm: 101325
+  };
+  const pa = v * (toPaFactor[from] ?? 1);
+  return {
+    Pa: pa,
+    bar: pa / 1e5,
+    psi: pa / 6894.757293168,
+    atm: pa / 101325
+  };
+};
+
+export const meta: CalculatorMeta = {
+  key: 'en:convert-pressure',
   slug: 'convert-pressure',
   category: 'engineering/units',
   locale: 'en',
@@ -21,22 +35,6 @@ export const spec: CalculatorSpec = {
     { id: 'psi', label: 'psi', unit:'psi', decimals: 6 },
     { id: 'atm', label: 'atm', unit:'atm', decimals: 9 }
   ],
-  formula: (inputs) => {
-    const v = Number(inputs.value ?? 0);
-    const from = String(inputs.from ?? 'Pa');
-
-    const toPaFactor: Record<string, number> = {
-      'Pa': 1, 'bar': 1e5, 'psi': 6894.757293168, 'atm': 101325
-    };
-
-    const pa = v * (toPaFactor[from] ?? 1);
-    return {
-      Pa: pa,
-      bar: pa / 1e5,
-      psi: pa / 6894.757293168,
-      atm: pa / 101325
-    };
-  },
   references: [
     { label: 'NIST — Pressure Units', url: 'https://physics.nist.gov/cuu/Units/units.html' }
   ],

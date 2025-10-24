@@ -24,7 +24,9 @@ export type OutputField = {
 
 export type Formula = (inputs: Record<string, number | string>) => Record<string, number | string>;
 
-export type CalculatorSpec = {
+export type CalculatorMeta = {
+  /** unique key used on client map, e.g. "en:convert-pressure" */
+  key: string;
   slug: string;
   category: string;
   locale: 'en' | 'it' | string;
@@ -33,7 +35,6 @@ export type CalculatorSpec = {
   keywords?: string[];
   inputs: InputField[];
   outputs: OutputField[];
-  formula: Formula;
   references?: { label: string; url: string }[];
   faq?: { q: string; aMd: string }[];
 };

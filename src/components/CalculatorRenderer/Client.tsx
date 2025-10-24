@@ -1,19 +1,29 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { CalculatorSpec } from '@/specs/calculator';
+import type { CalculatorMeta } from '@/specs/calculator';
+import { formula as pressureFormula } from '@/lib/formulas/convert-pressure';
+import { formula as pressioneFormula } from '@/lib/formulas/converti-pressione';
 
-export function CalculatorClient({ spec }: { spec: CalculatorSpec }) {
+const clientFormulas: Record<string, (inputs: Record<string, any>) => Record<string, any>> = {
+  'en:convert-pressure': pressureFormula,
+  'it:converti-pressione': pressioneFormula,
+};
+
+export function CalculatorClient({ meta }: { meta: CalculatorMeta }) {
   const [inputs, setInputs] = useState<Record<string, any>>(
-    Object.fromEntries(spec.inputs.map(i => [i.id, i.default ?? '']))
+    Object.fromEntries(meta.inputs.map(i => [i.id, i.default ?? '']))
   );
 
-  const outputs = useMemo(() => spec.formula(inputs), [inputs, spec]);
+  const outputs = useMemo(() => {
+    const f = clientFormulas[meta.key];
+    return f ? f(inputs) : {};
+  }, [inputs, meta.key]);
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-        {spec.inputs.map((f) => (
+        {meta.inputs.map((f) => (
           <div key={f.id} className="grid gap-1">
             <label htmlFor={f.id} className="font-medium">{f.label}</label>
             {f.type === 'number' && (
@@ -59,13 +69,13 @@ export function CalculatorClient({ spec }: { spec: CalculatorSpec }) {
         ))}
       </form>
       <section aria-live="polite" className="rounded-xl border p-4">
-        {spec.outputs.map((o) => (
+        {meta.outputs.map((o) => (
           <div key={o.id} className="flex justify-between py-1">
             <span>{o.label}</span>
             <output id={o.id} aria-live="polite">
               {typeof outputs[o.id] === 'number'
                 ? (outputs[o.id] as number).toFixed(o.decimals ?? 4)
-                : String(outputs[o.id])}
+                : String(outputs[o.id] ?? '')}
               {o.unit ? ` ${o.unit}` : ''}
             </output>
           </div>
