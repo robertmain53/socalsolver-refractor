@@ -2,13 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import type { CalculatorMeta } from '@/specs/calculator';
-import { formula as pressureFormula } from '@/lib/formulas/convert-pressure';
-import { formula as pressioneFormula } from '@/lib/formulas/converti-pressione';
 
-const clientFormulas: Record<string, (inputs: Record<string, any>) => Record<string, any>> = {
-  'en:convert-pressure': pressureFormula,
-  'it:converti-pressione': pressioneFormula,
-};
+import { clientFormulas } from './formulas.generated';
 
 export function CalculatorClient({ meta }: { meta: CalculatorMeta }) {
   const [inputs, setInputs] = useState<Record<string, any>>(
@@ -16,11 +11,10 @@ export function CalculatorClient({ meta }: { meta: CalculatorMeta }) {
   );
 
   const outputs = useMemo(() => {
-    const f = clientFormulas[meta.key];
-    return f ? f(inputs) : {};
-  }, [inputs, meta.key]);
-
-  return (
+  const f = clientFormulas.get(meta.key) as ((inputs: Record<string, any>) => Record<string, any>) | undefined;
+  return f ? f(inputs) : {};
+}, [inputs, meta.key]);
+return (
     <div className="grid gap-6 md:grid-cols-2">
       <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
         {meta.inputs.map((f) => (
